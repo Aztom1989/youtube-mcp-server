@@ -31,7 +31,6 @@ def youtube_search(
     published_after: Optional[str] = None,
 ) -> Dict[str, Any]:
     max_results = max(1, min(int(max_results), 50))
-
     params: Dict[str, Any] = {
         "part": "snippet",
         "type": "video",
@@ -56,13 +55,11 @@ def youtube_search(
             "thumbnail": (sn.get("thumbnails", {}).get("high", {}) or sn.get("thumbnails", {}).get("default", {})).get("url"),
             "url": f"https://www.youtube.com/watch?v={vid}" if vid else None,
         })
-
     return {"results": results}
 
 @mcp.tool()
 def youtube_video_stats(video_ids: List[str]) -> Dict[str, Any]:
     ids = ",".join([v for v in video_ids if v])
-
     data = _yt_get("/videos", {"part": "snippet,statistics", "id": ids})
 
     out = []
@@ -79,13 +76,11 @@ def youtube_video_stats(video_ids: List[str]) -> Dict[str, Any]:
             "commentCount": stats.get("commentCount"),
             "url": f"https://www.youtube.com/watch?v={it.get('id')}",
         })
-
     return {"videos": out}
 
 @mcp.tool()
 def youtube_comments(video_id: str, max_results: int = 20, order: str = "relevance") -> Dict[str, Any]:
     max_results = max(1, min(int(max_results), 100))
-
     data = _yt_get("/commentThreads", {
         "part": "snippet",
         "videoId": video_id,
@@ -104,10 +99,9 @@ def youtube_comments(video_id: str, max_results: int = 20, order: str = "relevan
             "likeCount": sn.get("likeCount"),
             "text": sn.get("textDisplay"),
         })
-
     return {"videoId": video_id, "comments": comments}
 
 if __name__ == "__main__":
-    # Render provides a PORT env var. We must use it.
+    # Render provides PORT automatically
     port = int(os.environ.get("PORT", "8000"))
     mcp.run(transport="sse", host="0.0.0.0", port=port)
